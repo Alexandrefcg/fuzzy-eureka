@@ -56,18 +56,7 @@ class SpecialistController extends Controller
 
     public function highestRated(int $limit = 10)
     {
-        $specialists = Cache::remember(
-            'highest_rated_specialists',
-            new \DateInterval('PT30S'),
-            fn () =>Specialist::select(
-                ['specialists.id', 'specialists.name', DB::raw('avg(reviews.rating) avg_rating')]
-            )
-            ->join('reviews', 'reviews.specialist_id', '=', 'specialists.id')
-            ->groupBy(['specialists.id', 'specialists.name'])
-            ->orderBy('avg_rating', 'desc')
-            ->limit($limit)
-            ->get()
-        );
-        return $specialists;
+        GenerateReportJob::dispatch(Auth::user()->email);
+        return response()->noContent();
     }
 }
